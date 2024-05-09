@@ -2,10 +2,11 @@ import React from "react";
 import { Order } from "../domain/types/Order.ts";
 
 interface OrderRowProps {
-  order: Order;
+  order?: Order;
 }
 
 const OrderRow: React.FC<OrderRowProps> = React.memo(({ order }) => {
+  if (!order) return null;
   return (
     <tr key={`row-${order.id}`}>
       <td>{order.id}</td>

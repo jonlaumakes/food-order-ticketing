@@ -1,19 +1,19 @@
-const fs = require('fs');
-const app = require('express')();
-const http = require('http').createServer(app);
+const fs = require("fs");
+const app = require("express")();
+const http = require("http").createServer(app);
 
-const localhostRegex = /http:\/\/localhost/
-const io = require('socket.io')(http, {
-  cors: { origin: localhostRegex }
+const localhostRegex = /http:\/\/localhost/;
+const io = require("socket.io")(http, {
+  cors: { origin: localhostRegex },
 });
 
 const PORT = 4000;
-const DATA_FILE = __dirname + '/order-data.json';
+const DATA_FILE = __dirname + "/order-data.json";
 
 // Initialize order data.
 const orders = JSON.parse(fs.readFileSync(DATA_FILE));
 const byTime = {};
-orders.forEach(order => {
+orders.forEach((order) => {
   const timestamp = String(order.sent_at_second);
   if (byTime[timestamp]) {
     byTime[timestamp].push(order);
@@ -22,12 +22,12 @@ orders.forEach(order => {
   }
 });
 
-app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/index.html');
+app.get("/", (req, res) => {
+  res.sendFile(__dirname + "/index.html");
 });
 
-app.get('/health', (req, res) => {
-  res.send('ok');
+app.get("/health", (req, res) => {
+  res.send("ok");
 });
 
 /**
@@ -39,24 +39,24 @@ app.get('/health', (req, res) => {
  * and stops after it receives a disconnect. Feel free to extend this if needed,
  * it's meant to be quite bare-bones :)
  */
-io.on('connection', (socket) => {
-  console.log('New connection');
+io.on("connection", (socket) => {
+  console.log("New connection");
   let elapsed = 0;
   const ticker = setInterval(() => {
     if (elapsed >= 330) {
-      console.log('All order events sent');
+      console.log("All order events sent");
       clearInterval(ticker);
       return;
     }
     const toSend = byTime[String(elapsed)];
     if (toSend && toSend.length > 0) {
-      io.emit('order_event', toSend);
+      io.emit("order_event", toSend);
     }
     elapsed += 1;
-  }, 1000);
+  }, 2500);
 
-  socket.on('disconnect', () => {
-    console.log('Client disconnected');
+  socket.on("disconnect", () => {
+    console.log("Client disconnected");
     clearInterval(ticker);
   });
 });
