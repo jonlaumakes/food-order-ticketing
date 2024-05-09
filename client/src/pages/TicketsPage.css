@@ -1,0 +1,51 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+.content {
+  flex: 1;
+  padding: 20px;
+}
+.footer {
+  background: #333;
+  color: white;
+  /* padding: 10px; */
+  text-align: center;
+  width: 100%;
+}
+#order-table {
+  border-collapse: collapse;
+  margin: 25px 0;
+  font-size: 0.9em;
+  font-family: sans-serif;
+  min-width: 400px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+#order-table thead tr {
+  background-color: #005698;
+  color: #ffffff;
+  text-align: left;
+}
+
+#order-table th,
+#order-table td {
+  padding: 12px 15px;
+}
+
+#order-table tbody tr {
+  border-bottom: 1px solid #dddddd;
+}
+
+#order-table tbody tr:nth-of-type(even) {
+  background-color: #f3f3f3;
+}
+
+#order-table tbody tr:last-of-type {
+  border-bottom: 2px solid #005698;
+}
+
+#order-table tbody tr.active-row {
+  font-weight: bold;
+  color: #005698;
+}
