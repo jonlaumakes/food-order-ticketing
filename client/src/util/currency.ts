@@ -44,3 +44,10 @@ export const getCents = (input: string): number => {
     return Number(removeSpecialCharacters(input)) * 100;
   }
 };
+
+export const convertCentsToDollars = (cents: number): string => {
+  const dollars = Math.floor(cents / 100);
+  const centsMod = cents % 100;
+
+  return `$${dollars}.${centsMod}`;
+};

@@ -1,10 +1,10 @@
-import React, { ChangeEvent, ReactNode, useEffect, useState } from "react";
+import React, { ChangeEvent, useEffect, useState } from "react";
 import io from "socket.io-client";
 import Header from "../components/Header.tsx";
 import Footer from "../components/Footer.tsx";
 import { Order } from "../domain/types/Order.ts";
 import OrderRow from "../components/OrderRow.tsx";
-import { formatCurrency, getCents } from "../util/formatCurrency.ts";
+import { formatCurrency, getCents } from "../util/currency.ts";
 import { filterOrdersByPrice, mergeOrders } from "../util/orders.ts";
 
 import "./TicketsPage.css";
@@ -16,59 +16,56 @@ type Column = {
 
 type State = {
   priceFilter: number;
-  PriceInputVal: string;
+  priceInputVal: string;
   orders: Order[];
   filteredOrders: Order[];
 };
 
 const initialState: State = {
   priceFilter: 0,
-  PriceInputVal: "",
+  priceInputVal: "",
   orders: [],
   filteredOrders: [],
 };
+
+const tableHeaders: Column[] = [
+  {
+    id: "id",
+    label: "ID",
+  },
+  {
+    id: "event_name",
+    label: "Event name",
+  },
+  {
+    id: "price",
+    label: "Price",
+  },
+  {
+    id: "item",
+    label: "Item",
+  },
+  {
+    id: "customer",
+    label: "Customer",
+  },
+  {
+    id: "destination",
+    label: "Destination",
+  },
+];
 
 interface Props extends React.HTMLAttributes<HTMLElement> {}
 
 const TicketsPage: React.FC<Props> = () => {
   const [orders, setOrders] = useState(initialState.orders);
-  const [priceFilter, setPriceFilter] = useState(initialState.priceFilter);
   const [filteredOrders, setFilteredOrders] = useState(
     initialState.filteredOrders
   );
-  const [PriceInputVal, setPriceInputVal] = useState(
-    initialState.PriceInputVal
+  const [priceFilter, setPriceFilter] = useState(initialState.priceFilter);
+  const [priceInputVal, setPriceInputVal] = useState(
+    initialState.priceInputVal
   );
-
-  // const debouncedSearchTerm = useDebounce(PriceInputVal, 250);
-
-  // todo: memoize column headers?
-  const tableHeaders: Column[] = [
-    {
-      id: "id",
-      label: "ID",
-    },
-    {
-      id: "event_name",
-      label: "Event name",
-    },
-    {
-      id: "price",
-      label: "Price",
-    },
-    {
-      id: "item",
-      label: "Item",
-    },
-    {
-      id: "customer",
-      label: "Customer",
-    },
-    {
-      id: "destination",
-      label: "Destination",
-    },
-  ];
 
   useEffect(() => {
     const socket = io("http://localhost:4000");
@@ -89,14 +86,11 @@ const TicketsPage: React.FC<Props> = () => {
   useEffect(() => {
     console.log("price filter updated", priceFilter);
     if (priceFilter > 0) {
-      const ordersFilteredByPrice = orders.filter((order) => {
-        const range = 2500;
-        const lowerBound = priceFilter - range;
-        const upperBound = priceFilter + range;
-
-        return order.price > lowerBound && order.price < upperBound;
-      });
-      console.log("ordersFiltered by price", ordersFilteredByPrice);
+      const ordersFilteredByPrice = filterOrdersByPrice(
+        orders,
+        priceFilter,
+        500
+      );
       setFilteredOrders(ordersFilteredByPrice);
     } else {
       setFilteredOrders([]);
@@ -115,7 +109,8 @@ const TicketsPage: React.FC<Props> = () => {
       if (prevPriceFilter > 0) {
         const filteredNewOrders = filterOrdersByPrice(
           newOrders,
-          prevPriceFilter
+          prevPriceFilter,
+          500
         );
         console.log("filteredNewOrders", prevPriceFilter, filteredOrders);
         setFilteredOrders((prevFilteredOrders) => {
@@ -133,11 +128,9 @@ const TicketsPage: React.FC<Props> = () => {
   const handlePriceInputChange = (e: ChangeEvent<HTMLInputElement>): void => {
     const inputVal = e.target.value;
     const formattedInput = formatCurrency(inputVal);
-    // update the input val
     setPriceInputVal(formattedInput);
 
     const cents = getCents(inputVal);
-    console.log("new price filter", cents);
     setPriceFilter(cents);
   };
 
@@ -149,7 +142,7 @@ const TicketsPage: React.FC<Props> = () => {
           <input
             type="text"
             onChange={handlePriceInputChange}
-            value={PriceInputVal}
+            value={priceInputVal}
             placeholder="Search by Price"
           />
           <table id="order-table">
@@ -161,9 +154,13 @@ const TicketsPage: React.FC<Props> = () => {
               </tr>
             </thead>
             <tbody>
-              {orders.map((order) => {
-                return <OrderRow key={order.id} order={order} />;
-              })}
+              {filteredOrders.length > 0
+                ? filteredOrders.map((order) => {
+                    return <OrderRow key={order.id} order={order} />;
+                  })
+                : orders.map((order) => {
+                    return <OrderRow key={order.id} order={order} />;
+                  })}
             </tbody>
           </table>
         </main>

@@ -2,10 +2,10 @@ import { Order } from "../domain/types/Order";
 
 export const filterOrdersByPrice = (
   orders: Order[],
-  filterPrice: number
+  filterPrice: number,
+  range: number
 ): Order[] => {
   return orders.filter((order) => {
-    const range = 2500;
     const lowerBound = filterPrice - range;
     const upperBound = filterPrice + range;
     console.log(

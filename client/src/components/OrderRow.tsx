@@ -1,6 +1,6 @@
 import React from "react";
 import { Order } from "../domain/types/Order.ts";
-import convertCentsToDollars from "../util/convertCentsToDollars.ts";
+import { convertCentsToDollars } from "../util/currency.ts";
 
 interface OrderRowProps {
   order?: Order;
