@@ -7,7 +7,6 @@
 
 .content {
   height: 80vh;
-  padding: 20px;
 }
 .footer {
   background: #333;
@@ -17,9 +16,16 @@
   width: 100%;
 }
 
+.search-row {
+  display: flex;
+  flex-direction: row;
+  align-content: space-between;
+}
+
 .table-container {
   overflow-y: auto;
   height: 70vh;
+  margin-top: 20px;
 }
 
 #order-table {
@@ -27,8 +33,7 @@
   table-layout: fixed;
   width: 70%vw;
   min-width: 400px;
-  margin: 25px 0;
-  font-size: 0.9em;
+  font-size: 0.7em;
   font-family: sans-serif;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
 }
