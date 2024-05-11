@@ -145,24 +145,28 @@ const TicketsPage: React.FC<Props> = () => {
             value={priceInputVal}
             placeholder="Search by Price"
           />
-          <table id="order-table">
-            <thead>
-              <tr>
-                {tableHeaders.map((col: Column) => {
-                  return <th key={col.id}>{col.label}</th>;
-                })}
-              </tr>
-            </thead>
-            <tbody>
-              {filteredOrders.length > 0
-                ? filteredOrders.map((order) => {
-                    return <OrderRow key={order.id} order={order} />;
-                  })
-                : orders.map((order) => {
-                    return <OrderRow key={order.id} order={order} />;
+          <div className="table-container">
+            <table id="order-table">
+              <thead>
+                <tr>
+                  {tableHeaders.map((col: Column) => {
+                    return <th key={col.id}>{col.label}</th>;
                   })}
-            </tbody>
-          </table>
+                </tr>
+              </thead>
+              {/* <div className="table-body-container"> */}
+              <tbody>
+                {filteredOrders.length > 0
+                  ? filteredOrders.map((order) => {
+                      return <OrderRow key={order.id} order={order} />;
+                    })
+                  : orders.map((order) => {
+                      return <OrderRow key={order.id} order={order} />;
+                    })}
+              </tbody>
+              {/* </div> */}
+            </table>
+          </div>
         </main>
         <div className="footer">
           <Footer title="Cloud Store Solutions 2024" />

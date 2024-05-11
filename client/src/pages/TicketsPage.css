@@ -4,8 +4,9 @@
   flex-direction: column;
   min-height: 100vh;
 }
+
 .content {
-  flex: 1;
+  height: 80vh;
   padding: 20px;
 }
 .footer {
@@ -15,14 +16,30 @@
   text-align: center;
   width: 100%;
 }
+
+.table-container {
+  overflow-y: auto;
+  height: 70vh;
+}
+
 #order-table {
   border-collapse: collapse;
+  table-layout: fixed;
+  width: 70%vw;
+  min-width: 400px;
   margin: 25px 0;
   font-size: 0.9em;
   font-family: sans-serif;
-  min-width: 400px;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
 }
+
+#order-table thead th {
+  position: sticky;
+  background-color: #005698;
+  top: 0;
+  z-index: 1;
+}
+
 #order-table thead tr {
   background-color: #005698;
   color: #ffffff;
@@ -32,6 +49,10 @@
 #order-table th,
 #order-table td {
   padding: 12px 15px;
+}
+
+#order-table tbody {
+  overflow-y: auto;
 }
 
 #order-table tbody tr {
