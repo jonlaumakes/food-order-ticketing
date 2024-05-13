@@ -6,17 +6,25 @@ export const filterOrdersByPrice = (
   range: number
 ): Order[] => {
   return orders.filter((order) => {
-    const lowerBound = filterPrice - range;
+    const lowerBound = filterPrice - range > 0 ? filterPrice - range : 0;
     const upperBound = filterPrice + range;
-    console.log(
-      order.price,
-      "fits bounds",
-      order.price > lowerBound && order.price < upperBound
-    );
 
     return order.price > lowerBound && order.price < upperBound;
   });
 };
+
+export const isOrderInPriceRange =
+  (filterPrice: number, range: number) => (order: Order) => {
+    const lowerBound = filterPrice - range > 0 ? filterPrice - range : 0;
+    const upperBound = filterPrice + range;
+    console.log(
+      "filter price",
+      order.price,
+      order.price > lowerBound && order.price < upperBound
+    );
+
+    return order.price > lowerBound && order.price < upperBound;
+  };
 
 export const mergeOrders = (
   newOrders: Order[],
@@ -27,7 +35,7 @@ export const mergeOrders = (
 
   const mergedOrders: Order[] = combined.reduce(
     (acc: Order[], order: Order) => {
-      // if valid orderId (not repeated)
+      // remove duplicates
       if (!orderMap.get(order.id)) {
         // add to accumulator
         acc.push(order);

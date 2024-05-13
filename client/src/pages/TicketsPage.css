@@ -3,6 +3,7 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  font-family: inter;
 }
 
 .content {
@@ -19,21 +20,27 @@
 .search-row {
   display: flex;
   flex-direction: row;
-  align-content: space-between;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .table-container {
+  border-radius: 0.5rem;
+  padding-right: 0.5rem;
+  padding-bottom: 0.5rem;
+  background-color: #ffffff;
+  opacity: 1;
   overflow-y: auto;
   height: 70vh;
   margin-top: 20px;
 }
 
 #order-table {
-  border-collapse: collapse;
+  display: table;
   table-layout: fixed;
-  width: 70%vw;
+  border-collapse: collapse;
   min-width: 400px;
-  font-size: 0.7em;
+  font-size: 0.7rem;
   font-family: sans-serif;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
 }
@@ -42,7 +49,7 @@
   position: sticky;
   background-color: #005698;
   top: 0;
-  z-index: 1;
+  z-index: 2;
 }
 
 #order-table thead tr {
@@ -65,7 +72,7 @@
 }
 
 #order-table tbody tr:nth-of-type(even) {
-  background-color: #f3f3f3;
+  background-color: #fafafa;
 }
 
 #order-table tbody tr:last-of-type {

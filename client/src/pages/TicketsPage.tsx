@@ -1,11 +1,11 @@
-import React, { ChangeEvent, useEffect, useState } from "react";
-import io from "socket.io-client";
+import React, { ChangeEvent, ReactNode, useEffect, useState } from "react";
 import Header from "../components/Header.tsx";
 import Footer from "../components/Footer.tsx";
 import { Order } from "../domain/types/Order.ts";
 import OrderRow from "../components/OrderRow.tsx";
 import { formatCurrency, getCents } from "../util/currency.ts";
-import { filterOrdersByPrice, mergeOrders } from "../util/orders.ts";
+import { filterOrdersByPrice } from "../util/orders.ts";
+import { PriceRangeFilter } from "../domain/types/PriceRangeFilter.ts";
 
 import "./TicketsPage.css";
 
@@ -16,6 +16,7 @@ type Column = {
 
 type State = {
   priceFilter: number;
+  priceFilterRange: number;
   priceInputVal: string;
   orders: Order[];
   filteredOrders: Order[];
@@ -23,6 +24,7 @@ type State = {
 
 const initialState: State = {
   priceFilter: 0,
+  priceFilterRange: 200,
   priceInputVal: "",
   orders: [],
   filteredOrders: [],
@@ -55,75 +57,74 @@ const tableHeaders: Column[] = [
   },
 ];
 
-interface Props extends React.HTMLAttributes<HTMLElement> {}
+const priceFiltersOptions: PriceRangeFilter[] = [
+  {
+    label: "Exact match",
+    value: 0,
+  },
+  {
+    label: "$1.00",
+    value: 100,
+  },
+  {
+    label: "$2.00",
+    value: 200,
+  },
+  {
+    label: "$5.00",
+    value: 500,
+  },
+  {
+    label: "$10.00",
+    value: 1000,
+  },
+];
 
-const TicketsPage: React.FC<Props> = () => {
-  const [orders, setOrders] = useState(initialState.orders);
+interface Props extends React.HTMLAttributes<HTMLElement> {
+  allOrders: Order[];
+}
+
+const TicketsPage: React.FC<Props> = ({ allOrders = [] }) => {
   const [filteredOrders, setFilteredOrders] = useState(
     initialState.filteredOrders
   );
   const [priceFilter, setPriceFilter] = useState(initialState.priceFilter);
+  const [priceFilterRange, setPriceFilterRange] = useState(
+    initialState.priceFilterRange
+  );
   const [priceInputVal, setPriceInputVal] = useState(
     initialState.priceInputVal
   );
 
+  // when new orders are recieved
   useEffect(() => {
-    const socket = io("http://localhost:4000");
-
-    socket.on("connect", () => {
-      console.log("Socket connected to server");
-    });
-
-    socket.on("order_event", (newOrders: Order[]) => {
-      handleNewOrders(newOrders);
-    });
-
-    return () => {
-      socket.disconnect();
-    };
-  }, []);
-
-  useEffect(() => {
-    console.log("price filter updated", priceFilter);
-    if (priceFilter > 0) {
+    console.log("all orders updated");
+    // update filtered orders
+    if (priceFilterRange > 0 || priceFilter > 0) {
       const ordersFilteredByPrice = filterOrdersByPrice(
-        orders,
+        allOrders,
         priceFilter,
-        500
+        priceFilterRange
       );
       setFilteredOrders(ordersFilteredByPrice);
-    } else {
+    }
+  }, [allOrders]);
+
+  // when user updates filters
+  useEffect(() => {
+    console.log("price filter updated", priceFilter, priceFilterRange);
+    if (priceFilterRange > 0 || priceFilter > 0) {
+      const ordersFilteredByPrice = filterOrdersByPrice(
+        allOrders,
+        priceFilter,
+        priceFilterRange
+      );
+      console.log("filtered orders", ordersFilteredByPrice);
+      setFilteredOrders(ordersFilteredByPrice);
+    } else if (priceFilterRange === 0 || priceFilter === 0) {
       setFilteredOrders([]);
     }
-  }, [priceFilter]);
-
-  const handleNewOrders = (newOrders: Order[]) => {
-    console.log("handle new orders - new orders", newOrders);
-    // set new orders to all orders
-    setOrders((prevAllOrders) => {
-      return mergeOrders(newOrders, prevAllOrders);
-    });
-
-    // update filtered orders
-    setPriceFilter((prevPriceFilter) => {
-      if (prevPriceFilter > 0) {
-        const filteredNewOrders = filterOrdersByPrice(
-          newOrders,
-          prevPriceFilter,
-          500
-        );
-        console.log("filteredNewOrders", prevPriceFilter, filteredOrders);
-        setFilteredOrders((prevFilteredOrders) => {
-          console.log(
-            "merged filter orders",
-            mergeOrders(filteredNewOrders, prevFilteredOrders)
-          );
-          return mergeOrders(filteredNewOrders, prevFilteredOrders);
-        });
-      }
-      return prevPriceFilter;
-    });
-  };
+  }, [priceFilter, priceFilterRange]);
 
   const handlePriceInputChange = (e: ChangeEvent<HTMLInputElement>): void => {
     const inputVal = e.target.value;
@@ -134,43 +135,87 @@ const TicketsPage: React.FC<Props> = () => {
     setPriceFilter(cents);
   };
 
+  const handlePriceFilterChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    console.log("e", e.target.value);
+    setPriceFilterRange(Number(e.target.value) || 0);
+  };
+
+  const renderNoRecordsMsg = (): ReactNode => {
+    if (allOrders.length === 0) {
+      return (
+        <div className="no-records-container">
+          <p>No orders found in price range</p>
+        </div>
+      );
+    }
+    if (
+      filteredOrders.length === 0 &&
+      priceFilterRange > 0 &&
+      priceFilter > 0
+    ) {
+      return (
+        <div className="no-records-container">
+          <p>No orders found in price range</p>
+        </div>
+      );
+    }
+  };
+
+  const renderOrderTable = (): ReactNode => {
+    return (
+      <div className="table-container">
+        <table id="order-table" className="table">
+          <thead>
+            <tr>
+              {tableHeaders.map((col: Column) => {
+                return <th key={col.id}>{col.label}</th>;
+              })}
+            </tr>
+          </thead>
+          <tbody>
+            {filteredOrders.length > 0
+              ? filteredOrders.map((order) => {
+                  return <OrderRow key={order.id} order={order} />;
+                })
+              : allOrders.map((order) => {
+                  return <OrderRow key={order.id} order={order} />;
+                })}
+          </tbody>
+        </table>
+      </div>
+    );
+  };
+
   return (
     <>
       <div className="container">
         <Header title="CSS Ticketing" />
         <main className="content">
-          <input
-            type="text"
-            onChange={handlePriceInputChange}
-            value={priceInputVal}
-            placeholder="Search by Price"
-          />
-          <div className="table-container">
-            <table id="order-table">
-              <thead>
-                <tr>
-                  {tableHeaders.map((col: Column) => {
-                    return <th key={col.id}>{col.label}</th>;
-                  })}
-                </tr>
-              </thead>
-              {/* <div className="table-body-container"> */}
-              <tbody>
-                {filteredOrders.length > 0
-                  ? filteredOrders.map((order) => {
-                      return <OrderRow key={order.id} order={order} />;
-                    })
-                  : orders.map((order) => {
-                      return <OrderRow key={order.id} order={order} />;
-                    })}
-              </tbody>
-              {/* </div> */}
-            </table>
+          <div className="fitlers-container">
+            <input
+              type="text"
+              onChange={handlePriceInputChange}
+              value={priceInputVal}
+              placeholder="Search by Price"
+            />
+            <select value={priceFilterRange} onChange={handlePriceFilterChange}>
+              {priceFiltersOptions.map((option) => {
+                return <option value={option.value}>{option.label}</option>;
+              })}
+            </select>
+            <p className="record-count">
+              {`Orders: ${
+                priceFilter ? filteredOrders.length : allOrders.length
+              }`}
+            </p>
           </div>
+          {allOrders.length === 0 && filteredOrders.length === 0
+            ? renderNoRecordsMsg()
+            : renderOrderTable()}
         </main>
-        <div className="footer">
+        {/* <div className="footer">
           <Footer title="Cloud Store Solutions 2024" />
-        </div>
+        </div> */}
       </div>
     </>
   );
