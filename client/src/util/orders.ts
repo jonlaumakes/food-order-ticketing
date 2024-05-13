@@ -9,7 +9,7 @@ export const filterOrdersByPrice = (
     const lowerBound = filterPrice - range > 0 ? filterPrice - range : 0;
     const upperBound = filterPrice + range;
 
-    return order.price > lowerBound && order.price < upperBound;
+    return order.price >= lowerBound && order.price <= upperBound;
   });
 };
 

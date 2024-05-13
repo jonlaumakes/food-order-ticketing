@@ -1,6 +1,5 @@
 import React, { ChangeEvent, ReactNode, useEffect, useState } from "react";
 import Header from "../components/Header.tsx";
-import Footer from "../components/Footer.tsx";
 import { Order } from "../domain/types/Order.ts";
 import OrderRow from "../components/OrderRow.tsx";
 import { formatCurrency, getCents } from "../util/currency.ts";
@@ -24,7 +23,7 @@ type State = {
 
 const initialState: State = {
   priceFilter: 0,
-  priceFilterRange: 200,
+  priceFilterRange: 0,
   priceInputVal: "",
   orders: [],
   filteredOrders: [],
@@ -114,6 +113,7 @@ const TicketsPage: React.FC<Props> = ({ allOrders = [] }) => {
   useEffect(() => {
     console.log("price filter updated", priceFilter, priceFilterRange);
     if (priceFilterRange > 0 || priceFilter > 0) {
+      console.log("valid filters");
       const ordersFilteredByPrice = filterOrdersByPrice(
         allOrders,
         priceFilter,
@@ -121,7 +121,8 @@ const TicketsPage: React.FC<Props> = ({ allOrders = [] }) => {
       );
       console.log("filtered orders", ordersFilteredByPrice);
       setFilteredOrders(ordersFilteredByPrice);
-    } else if (priceFilterRange === 0 || priceFilter === 0) {
+    } else if (priceFilterRange === 0 && priceFilter === 0) {
+      console.log("no filters applied");
       setFilteredOrders([]);
     }
   }, [priceFilter, priceFilterRange]);
@@ -147,8 +148,7 @@ const TicketsPage: React.FC<Props> = ({ allOrders = [] }) => {
           <p>No orders found in price range</p>
         </div>
       );
-    }
-    if (
+    } else if (
       filteredOrders.length === 0 &&
       priceFilterRange > 0 &&
       priceFilter > 0
@@ -162,60 +162,73 @@ const TicketsPage: React.FC<Props> = ({ allOrders = [] }) => {
   };
 
   const renderOrderTable = (): ReactNode => {
-    return (
-      <div className="table-container">
-        <table id="order-table" className="table">
-          <thead>
-            <tr>
-              {tableHeaders.map((col: Column) => {
-                return <th key={col.id}>{col.label}</th>;
-              })}
-            </tr>
-          </thead>
-          <tbody>
-            {filteredOrders.length > 0
-              ? filteredOrders.map((order) => {
-                  return <OrderRow key={order.id} order={order} />;
-                })
-              : allOrders.map((order) => {
-                  return <OrderRow key={order.id} order={order} />;
+    const noFilterdRecords =
+      (priceFilter > 0 || priceFilterRange > 0) && filteredOrders.length === 0;
+
+    if (noFilterdRecords || allOrders.length === 0) {
+      return renderNoRecordsMsg();
+    } else {
+      return (
+        <div className="table-container">
+          <table id="order-table" className="table">
+            <thead>
+              <tr>
+                {tableHeaders.map((col: Column) => {
+                  return <th key={col.id}>{col.label}</th>;
                 })}
-          </tbody>
-        </table>
-      </div>
-    );
+              </tr>
+            </thead>
+            <tbody>
+              {priceFilter > 0 || priceFilterRange > 0
+                ? filteredOrders.map((order) => {
+                    return <OrderRow key={order.id} order={order} />;
+                  })
+                : allOrders.map((order) => {
+                    return <OrderRow key={order.id} order={order} />;
+                  })}
+            </tbody>
+          </table>
+        </div>
+      );
+    }
   };
 
   return (
     <>
       <div className="container">
-        <Header title="CSS Ticketing" />
+        <Header title="Current Orders" />
         <main className="content">
-          <div className="fitlers-container">
-            <input
-              type="text"
-              onChange={handlePriceInputChange}
-              value={priceInputVal}
-              placeholder="Search by Price"
-            />
-            <select value={priceFilterRange} onChange={handlePriceFilterChange}>
-              {priceFiltersOptions.map((option) => {
-                return <option value={option.value}>{option.label}</option>;
-              })}
-            </select>
+          <div className="filters-container">
+            <div className="input-container">
+              <label>Search by Price</label>
+              <input
+                type="text"
+                onChange={handlePriceInputChange}
+                value={priceInputVal}
+                placeholder="Search by Price"
+              />
+            </div>
+            <div className="input-container">
+              <label>Price Range</label>
+              <select
+                value={priceFilterRange}
+                onChange={handlePriceFilterChange}
+              >
+                {priceFiltersOptions.map((option) => {
+                  return <option value={option.value}>{option.label}</option>;
+                })}
+              </select>
+            </div>
+          </div>
+          <div className="order-count-container">
             <p className="record-count">
               {`Orders: ${
                 priceFilter ? filteredOrders.length : allOrders.length
               }`}
             </p>
           </div>
-          {allOrders.length === 0 && filteredOrders.length === 0
-            ? renderNoRecordsMsg()
-            : renderOrderTable()}
+          {renderOrderTable()}
         </main>
-        {/* <div className="footer">
-          <Footer title="Cloud Store Solutions 2024" />
-        </div> */}
       </div>
     </>
   );
