@@ -97,7 +97,6 @@ const TicketsPage: React.FC<Props> = ({ allOrders = [] }) => {
 
   // when new orders are recieved
   useEffect(() => {
-    console.log("all orders updated");
     // update filtered orders
     if (priceFilterRange > 0 || priceFilter > 0) {
       const ordersFilteredByPrice = filterOrdersByPrice(
@@ -111,18 +110,14 @@ const TicketsPage: React.FC<Props> = ({ allOrders = [] }) => {
 
   // when user updates filters
   useEffect(() => {
-    console.log("price filter updated", priceFilter, priceFilterRange);
     if (priceFilterRange > 0 || priceFilter > 0) {
-      console.log("valid filters");
       const ordersFilteredByPrice = filterOrdersByPrice(
         allOrders,
         priceFilter,
         priceFilterRange
       );
-      console.log("filtered orders", ordersFilteredByPrice);
       setFilteredOrders(ordersFilteredByPrice);
     } else if (priceFilterRange === 0 && priceFilter === 0) {
-      console.log("no filters applied");
       setFilteredOrders([]);
     }
   }, [priceFilter, priceFilterRange]);
@@ -137,7 +132,6 @@ const TicketsPage: React.FC<Props> = ({ allOrders = [] }) => {
   };
 
   const handlePriceFilterChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    console.log("e", e.target.value);
     setPriceFilterRange(Number(e.target.value) || 0);
   };
 
@@ -145,14 +139,10 @@ const TicketsPage: React.FC<Props> = ({ allOrders = [] }) => {
     if (allOrders.length === 0) {
       return (
         <div className="no-records-container">
-          <p>No orders found in price range</p>
+          <p>No current orders</p>
         </div>
       );
-    } else if (
-      filteredOrders.length === 0 &&
-      priceFilterRange > 0 &&
-      priceFilter > 0
-    ) {
+    } else {
       return (
         <div className="no-records-container">
           <p>No orders found in price range</p>
@@ -162,10 +152,10 @@ const TicketsPage: React.FC<Props> = ({ allOrders = [] }) => {
   };
 
   const renderOrderTable = (): ReactNode => {
-    const noFilterdRecords =
+    const validFiltersNoRecordsFound =
       (priceFilter > 0 || priceFilterRange > 0) && filteredOrders.length === 0;
 
-    if (noFilterdRecords || allOrders.length === 0) {
+    if (validFiltersNoRecordsFound || allOrders.length === 0) {
       return renderNoRecordsMsg();
     } else {
       return (

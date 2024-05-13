@@ -81,7 +81,7 @@ input:focus {
   display: table;
   table-layout: fixed;
   border-collapse: collapse;
-  min-width: 400px;
+  width: 100%;
   font-size: 1rem;
   font-family: sans-serif;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
