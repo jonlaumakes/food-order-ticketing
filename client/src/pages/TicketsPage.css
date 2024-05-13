@@ -66,6 +66,12 @@ input:focus {
   margin-bottom: 0;
 }
 
+.no-records-container {
+  padding-top: 0.5rem;
+  text-align: center;
+  font-size: 1.4rem;
+}
+
 .table-container {
   border-radius: 0.5rem;
   padding-right: 0.5rem;
