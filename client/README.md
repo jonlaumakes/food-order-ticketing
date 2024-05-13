@@ -1,5 +1,6 @@
 ## Running client
 
+Branch: main
 To test locally run `npm install && npm run dev`. The client runs on http://localhost:5173/
 
 # React + TypeScript + Vite
