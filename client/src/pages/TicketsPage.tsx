@@ -96,7 +96,8 @@ const TicketsPage: React.FC<Props> = ({ allOrders = [] }) => {
     initialState.priceInputVal
   );
   const [searchTerm, setSearchTerm] = useState("");
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+  const debouncedSearchTerm = useDebounce(searchTerm, 700);
+  // const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
 
   // when new orders are recieved
   useEffect(() => {
@@ -111,19 +112,23 @@ const TicketsPage: React.FC<Props> = ({ allOrders = [] }) => {
     }
   }, [allOrders]);
 
-  useEffect(() => {
-    console.log("input update", searchTerm);
+  // useEffect(() => {
+  //   console.log("input update", searchTerm);
 
-    const timeout = setTimeout(() => {
-      setDebouncedSearchTerm(searchTerm);
-    }, 500);
+  //   const timeout = setTimeout(() => {
+  //     setDebouncedSearchTerm(searchTerm);
+  //   }, 500);
 
-    return () => clearTimeout(timeout);
-  }, [searchTerm]);
+  //   return () => clearTimeout(timeout);
+  // }, [searchTerm]);
 
   useEffect(() => {
     console.log("DEBOUNCE VAL:", debouncedSearchTerm);
   }, [debouncedSearchTerm]);
+
+  useEffect(() => {
+    console.log("input val:", searchTerm);
+  }, [searchTerm]);
 
   // when user updates filters
   useEffect(() => {
