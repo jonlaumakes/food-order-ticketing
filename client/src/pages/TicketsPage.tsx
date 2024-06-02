@@ -1,4 +1,5 @@
 import React, { ChangeEvent, ReactNode, useEffect, useState } from "react";
+import { useDebounce } from "../hooks/useDebounce.ts";
 import Header from "../components/Header.tsx";
 import { Order } from "../domain/types/Order.ts";
 import OrderRow from "../components/OrderRow.tsx";
@@ -94,6 +95,8 @@ const TicketsPage: React.FC<Props> = ({ allOrders = [] }) => {
   const [priceInputVal, setPriceInputVal] = useState(
     initialState.priceInputVal
   );
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
 
   // when new orders are recieved
   useEffect(() => {
@@ -107,6 +110,20 @@ const TicketsPage: React.FC<Props> = ({ allOrders = [] }) => {
       setFilteredOrders(ordersFilteredByPrice);
     }
   }, [allOrders]);
+
+  useEffect(() => {
+    console.log("input update", searchTerm);
+
+    const timeout = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 500);
+
+    return () => clearTimeout(timeout);
+  }, [searchTerm]);
+
+  useEffect(() => {
+    console.log("DEBOUNCE VAL:", debouncedSearchTerm);
+  }, [debouncedSearchTerm]);
 
   // when user updates filters
   useEffect(() => {
@@ -133,6 +150,10 @@ const TicketsPage: React.FC<Props> = ({ allOrders = [] }) => {
 
   const handlePriceFilterChange = (e: ChangeEvent<HTMLSelectElement>) => {
     setPriceFilterRange(Number(e.target.value) || 0);
+  };
+
+  const handleSearchTermChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value || "");
   };
 
   const renderNoRecordsMsg = (): ReactNode => {
@@ -189,6 +210,15 @@ const TicketsPage: React.FC<Props> = ({ allOrders = [] }) => {
         <Header title="Current Orders" />
         <main className="content">
           <div className="filters-container">
+            <div className="input-container">
+              <label>Global Search</label>
+              <input
+                type="text"
+                onChange={handleSearchTermChange}
+                // value={priceInputVal}
+                placeholder="Global search"
+              />
+            </div>
             <div className="input-container">
               <label>Search by Price</label>
               <input
